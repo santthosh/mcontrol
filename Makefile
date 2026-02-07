@@ -1,4 +1,4 @@
-.PHONY: dev dev-api dev-desktop build test lint typecheck docker-up docker-down clean
+.PHONY: dev dev-api dev-desktop build test lint typecheck docker-up docker-down clean release version
 
 # Start everything: Docker (Postgres + Redis) + API + Desktop
 dev: docker-up
@@ -79,3 +79,28 @@ migrate:
 migration:
 	@read -p "Migration message: " msg; \
 	cd apps/api && .venv/bin/alembic revision --autogenerate -m "$$msg"
+
+# Sync version across all files (for testing locally)
+# Usage: make version VERSION=2026.02.07.1
+version:
+ifndef VERSION
+	$(error VERSION is required. Usage: make version VERSION=2026.02.07.1)
+endif
+	@echo "Syncing version $(VERSION) across all files..."
+	@.github/scripts/sync-versions.sh $(VERSION)
+
+# Create and push a release tag (triggers GitHub Actions release workflow)
+# Usage: make release VERSION=2026.02.07.1
+release:
+ifndef VERSION
+	$(error VERSION is required. Usage: make release VERSION=2026.02.07.1)
+endif
+	@echo "Creating release v$(VERSION)..."
+	@.github/scripts/sync-versions.sh $(VERSION)
+	@git add -A
+	@git commit -m "chore: bump version to $(VERSION)" || echo "No version changes to commit"
+	@git tag -a "v$(VERSION)" -m "Release $(VERSION)"
+	@echo ""
+	@echo "Release tag v$(VERSION) created locally."
+	@echo "To publish the release, run:"
+	@echo "  git push origin main && git push origin v$(VERSION)"
