@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://placehold.co/120x120/0ea5e9/white?text=M" alt="Mission Control Logo" width="120" height="120">
+  <img src="./assets/logo.png" alt="Mission Control Logo" width="120" height="120">
 </p>
 
 <h1 align="center">Mission Control</h1>
