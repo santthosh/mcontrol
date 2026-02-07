@@ -48,7 +48,7 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
                     # Echo back for now - will be extended for agent communication
                     await websocket.send_json({"type": "ack", "data": data})
 
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 # Send heartbeat on timeout
                 await websocket.send_json({"type": "heartbeat"})
 

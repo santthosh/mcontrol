@@ -23,7 +23,7 @@ export type {
   Task as TaskType,
   TeamMember as TeamMemberType,
   Model as ModelType,
-  Credential as CredentialType,
+  Credential as CredentialSchema,
   UserSettings as UserSettingsType,
   HealthResponse as HealthResponseType,
 } from "./schemas";

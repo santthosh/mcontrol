@@ -40,12 +40,12 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    token = credentials.credentials
+    _token = credentials.credentials  # Will be used for Firebase validation
 
     try:
         # In production, validate with Firebase Admin SDK
         # from firebase_admin import auth
-        # decoded_token = auth.verify_id_token(token)
+        # decoded_token = auth.verify_id_token(_token)
         # return AuthUser(uid=decoded_token["uid"], email=decoded_token.get("email"))
 
         # Placeholder - implement Firebase validation
