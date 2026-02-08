@@ -27,7 +27,7 @@ dev: docker-up
 	@echo "Starting API and Desktop..."
 	@trap 'make docker-down' EXIT; \
 	(cd apps/api && .venv/bin/uvicorn app.main:app --reload --port 8000) & \
-	(cd apps/desktop && pnpm dev) & \
+	(cd apps/desktop && VITE_FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 pnpm dev) & \
 	wait
 
 # Docker + API server only
@@ -40,7 +40,11 @@ dev-api: docker-up
 dev-desktop:
 	@echo "Starting Desktop app (ENV=$(ENV))..."
 	@echo "API URL: $(API_URL)"
+ifeq ($(ENV),local)
+	cd apps/desktop && VITE_API_URL=$(API_URL) VITE_FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 pnpm dev
+else
 	cd apps/desktop && VITE_API_URL=$(API_URL) pnpm dev
+endif
 
 # Start Docker containers (Firebase Emulator)
 docker-up:
