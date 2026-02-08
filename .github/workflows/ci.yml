@@ -122,18 +122,20 @@ jobs:
         run: pip install -e ".[dev]"
 
       - name: Start Firebase Emulator
+        working-directory: .
         run: |
-          cd ../..
           firebase emulators:start --only firestore,auth --project mcontrol-dev &
-          # Wait for emulator to be ready
+          # Wait for Firestore emulator to be ready on port 8080
           for i in {1..30}; do
-            if curl -s http://localhost:4000 > /dev/null 2>&1; then
-              echo "Emulator is ready"
+            if curl -s http://localhost:8080 > /dev/null 2>&1; then
+              echo "Firestore emulator is ready"
               break
             fi
-            echo "Waiting for emulator... ($i/30)"
+            echo "Waiting for Firestore emulator... ($i/30)"
             sleep 2
           done
+          # Verify emulator is responding
+          curl -s http://localhost:8080 || echo "Warning: Firestore emulator not responding"
 
       - name: Run tests
         env:
