@@ -34,9 +34,7 @@ def _initialize_app() -> firebase_admin.App | None:
 
     # Production mode - use default credentials
     cred = credentials.ApplicationDefault()
-    app = firebase_admin.initialize_app(
-        cred, options={"projectId": settings.firebase_project_id}
-    )
+    app = firebase_admin.initialize_app(cred, options={"projectId": settings.firebase_project_id})
     return app
 
 

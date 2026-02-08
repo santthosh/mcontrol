@@ -11,5 +11,7 @@ def test_health_check(client: TestClient) -> None:
     # Print debug info if status is not ok
     if data["status"] != "ok":
         print(f"Health check response: {data}")
-    assert data["status"] == "ok", f"Expected 'ok' but got '{data['status']}'. Debug: {data.get('debug', 'no debug info')}"
+    assert data["status"] == "ok", (
+        f"Expected 'ok' but got '{data['status']}'. Debug: {data.get('debug', 'no debug info')}"
+    )
     assert data["version"] == "0.0.1"
