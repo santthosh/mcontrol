@@ -33,8 +33,9 @@ module "mcontrol" {
   allow_unauthenticated    = true
   create_artifact_registry = false  # Created by dev environment
 
-  # Custom domain
-  api_domain = "staging-api.mcontrol.ai"
+  # Custom domain and public base URL
+  api_domain   = "staging-api.mcontrol.ai"
+  api_base_url = "https://staging-api.mcontrol.ai"
 }
 
 output "api_url" {

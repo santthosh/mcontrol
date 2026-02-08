@@ -5,9 +5,11 @@
 #   - gcloud CLI installed and authenticated
 #   - Docker installed
 #   - PROJECT_ID environment variable set
+#   - API_BASE_URL environment variable set (e.g., https://api.mcontrol.ai)
 #
 # Usage:
 #   export PROJECT_ID=your-project-id
+#   export API_BASE_URL=https://api.mcontrol.ai
 #   ./deploy.sh
 
 set -euo pipefail
@@ -39,8 +41,8 @@ gcloud run deploy "${SERVICE_NAME}" \
   --platform managed \
   --region "${REGION}" \
   --allow-unauthenticated \
-  --set-env-vars "FIREBASE_PROJECT_ID=${PROJECT_ID}" \
-  --set-secrets "DATABASE_URL=database-url:latest,REDIS_URL=redis-url:latest"
+  --set-env-vars "FIREBASE_PROJECT_ID=${PROJECT_ID},API_BASE_URL=${API_BASE_URL}" \
+  --set-secrets "GOOGLE_CLIENT_ID=google-client-id:latest,GOOGLE_CLIENT_SECRET=google-client-secret:latest"
 
 echo "Deployment complete!"
 echo "Service URL: $(gcloud run services describe ${SERVICE_NAME} --region ${REGION} --format 'value(status.url)')"

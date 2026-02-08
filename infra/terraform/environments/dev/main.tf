@@ -33,8 +33,9 @@ module "mcontrol" {
   api_max_instances     = 2
   allow_unauthenticated = true
 
-  # Custom domain
-  api_domain = "dev-api.mcontrol.ai"
+  # Custom domain and public base URL
+  api_domain   = "dev-api.mcontrol.ai"
+  api_base_url = "https://dev-api.mcontrol.ai"
 }
 
 # Outputs

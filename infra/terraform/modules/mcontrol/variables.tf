@@ -85,3 +85,8 @@ variable "api_domain" {
   type        = string
   default     = null
 }
+
+variable "api_base_url" {
+  description = "Public base URL for the API (used for OAuth redirect URIs)"
+  type        = string
+}
