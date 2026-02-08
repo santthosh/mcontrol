@@ -5,6 +5,13 @@
 // API base URL from environment variable, defaults to localhost
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
+/**
+ * Get the current API URL (for debugging/display).
+ */
+export function getApiUrl(): string {
+  return API_BASE_URL;
+}
+
 export interface HealthResponse {
   status: "ok" | "error";
   version: string;

@@ -1,1 +1,1 @@
-{"default":{"identifier":"default","description":"Default capabilities for the Mission Control app","local":true,"windows":["*"],"permissions":["http:default",{"identifier":"http:allow-fetch","allow":[{"url":"http://localhost:8000/**"},{"url":"https://*.run.app/**"}]}]}}
+{"default":{"identifier":"default","description":"Default capabilities for the Mission Control app","local":true,"windows":["*"],"permissions":["http:default",{"identifier":"http:allow-fetch","allow":[{"url":"http://localhost:8000/**"},{"url":"https://*.mcontrol.ai/**"},{"url":"https://*.run.app/**"}]}]}}
