@@ -71,7 +71,6 @@ resource "google_cloud_run_v2_service" "api" {
 
   depends_on = [
     google_project_service.apis,
-    google_artifact_registry_repository.containers,
   ]
 
   lifecycle {

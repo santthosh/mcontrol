@@ -28,9 +28,10 @@ module "mcontrol" {
   github_repo = var.github_repo
 
   # Staging-specific settings
-  api_min_instances     = 0
-  api_max_instances     = 5
-  allow_unauthenticated = true
+  api_min_instances        = 0
+  api_max_instances        = 5
+  allow_unauthenticated    = true
+  create_artifact_registry = false  # Created by dev environment
 }
 
 output "api_url" {

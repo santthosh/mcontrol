@@ -28,11 +28,12 @@ module "mcontrol" {
   github_repo = var.github_repo
 
   # Production-specific settings
-  api_min_instances     = 1   # Always keep at least 1 instance warm
-  api_max_instances     = 20
-  api_cpu               = "2"
-  api_memory            = "1Gi"
-  allow_unauthenticated = true
+  api_min_instances        = 1   # Always keep at least 1 instance warm
+  api_max_instances        = 20
+  api_cpu                  = "2"
+  api_memory               = "1Gi"
+  allow_unauthenticated    = true
+  create_artifact_registry = false  # Created by dev environment
 }
 
 output "api_url" {

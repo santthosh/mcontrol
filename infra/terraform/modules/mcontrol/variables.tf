@@ -73,3 +73,9 @@ variable "github_repo" {
   description = "GitHub repository in format owner/repo for Workload Identity"
   type        = string
 }
+
+variable "create_artifact_registry" {
+  description = "Whether to create Artifact Registry (only needed for first environment)"
+  type        = bool
+  default     = true
+}

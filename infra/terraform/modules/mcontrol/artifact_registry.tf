@@ -1,6 +1,9 @@
 # Artifact Registry repository for container images
 # Shared across environments (one repo, different tags)
+# Only create in first environment (dev), others reference it
 resource "google_artifact_registry_repository" "containers" {
+  count = var.create_artifact_registry ? 1 : 0
+
   project       = var.project_id
   location      = var.region
   repository_id = "mcontrol"
@@ -24,6 +27,6 @@ resource "google_artifact_registry_repository" "containers" {
 
 # Output the repository URL for use in CI/CD
 locals {
-  artifact_registry_url = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.containers.repository_id}"
+  artifact_registry_url = "${var.region}-docker.pkg.dev/${var.project_id}/mcontrol"
   api_image_url         = "${local.artifact_registry_url}/api"
 }
