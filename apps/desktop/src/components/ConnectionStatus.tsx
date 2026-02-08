@@ -72,22 +72,22 @@ export function ConnectionStatus() {
       </button>
 
       {showDetails && (
-        <div className="absolute top-full left-0 mt-1 p-3 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-64">
+        <div className="absolute top-full right-0 mt-1 p-3 bg-white border border-gray-200 rounded-lg shadow-lg z-50 w-80">
           <div className="text-xs font-medium text-gray-500 uppercase mb-2">
             Connection Details
           </div>
-          <div className="space-y-1 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-500">Status:</span>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between gap-4">
+              <span className="text-gray-500 shrink-0">Status:</span>
               <span className="font-medium">{statusLabels[state]}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">API URL:</span>
-              <span className="font-mono text-xs">{apiUrl}</span>
+            <div className="flex justify-between gap-4">
+              <span className="text-gray-500 shrink-0">API URL:</span>
+              <span className="font-mono text-xs break-all text-right">{apiUrl}</span>
             </div>
             {version && (
-              <div className="flex justify-between">
-                <span className="text-gray-500">Version:</span>
+              <div className="flex justify-between gap-4">
+                <span className="text-gray-500 shrink-0">Version:</span>
                 <span className="font-medium">{version}</span>
               </div>
             )}
