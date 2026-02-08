@@ -1,7 +1,6 @@
 """Firebase SDK initialization with emulator support."""
 
 import os
-from functools import lru_cache
 from typing import TYPE_CHECKING
 
 import firebase_admin
@@ -12,10 +11,13 @@ if TYPE_CHECKING:
 
 from app.lib.config import get_settings
 
+# Track if we've initialized
+_initialized = False
+
 
 def _initialize_app() -> firebase_admin.App:
     """Initialize Firebase Admin SDK with project configuration."""
-    settings = get_settings()
+    global _initialized
 
     # Check if already initialized
     try:
@@ -23,12 +25,18 @@ def _initialize_app() -> firebase_admin.App:
     except ValueError:
         pass
 
+    settings = get_settings()
+    emulator_host = os.environ.get("FIRESTORE_EMULATOR_HOST")
+
     # Initialize with project ID
     # When running against emulator, no credentials needed
     # In production, use default credentials (ADC)
-    if os.environ.get("FIRESTORE_EMULATOR_HOST"):
-        # Emulator mode - no credentials needed
-        app = firebase_admin.initialize_app(options={"projectId": settings.firebase_project_id})
+    if emulator_host:
+        # Emulator mode - no credentials needed, use mock credentials
+        app = firebase_admin.initialize_app(
+            credential=None,
+            options={"projectId": settings.firebase_project_id},
+        )
     else:
         # Production mode - use default credentials
         cred = credentials.ApplicationDefault()
@@ -36,11 +44,11 @@ def _initialize_app() -> firebase_admin.App:
             cred, options={"projectId": settings.firebase_project_id}
         )
 
+    _initialized = True
     return app
 
 
-@lru_cache
 def get_firestore_client() -> "Client":
-    """Get cached Firestore client instance."""
+    """Get Firestore client instance."""
     _initialize_app()
     return firestore.client()
