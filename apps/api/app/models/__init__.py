@@ -1,33 +1,29 @@
-"""SQLAlchemy models."""
+"""Firestore document models."""
 
-from datetime import datetime
-from typing import Any
-
-from sqlalchemy import MetaData
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-
-# Naming convention for constraints
-convention = {
-    "ix": "ix_%(column_0_label)s",
-    "uq": "uq_%(table_name)s_%(column_0_name)s",
-    "ck": "ck_%(table_name)s_%(constraint_name)s",
-    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
-    "pk": "pk_%(table_name)s",
-}
+from dataclasses import asdict, dataclass, field
+from datetime import UTC, datetime
+from typing import Any, ClassVar
 
 
-class Base(DeclarativeBase):
-    """Base class for all SQLAlchemy models."""
+@dataclass
+class BaseDocument:
+    """Base class for all Firestore document models."""
 
-    metadata = MetaData(naming_convention=convention)
+    COLLECTION: ClassVar[str] = ""
+
+    id: str = ""
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert model to dictionary."""
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        """Convert model to dictionary for Firestore storage."""
+        data = asdict(self)
+        # Remove id from dict (it's the document ID, not a field)
+        data.pop("id", None)
+        return data
 
-
-class TimestampMixin:
-    """Mixin for created_at and updated_at timestamps."""
-
-    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, onupdate=datetime.utcnow)
+    @classmethod
+    def from_dict(cls, doc_id: str, data: dict[str, Any]) -> "BaseDocument":
+        """Create model instance from Firestore document data."""
+        data["id"] = doc_id
+        return cls(**data)

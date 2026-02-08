@@ -1,36 +1,16 @@
-version: "3.9"
-
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: mcontrol-postgres
-    environment:
-      POSTGRES_USER: mcontrol
-      POSTGRES_PASSWORD: mcontrol
-      POSTGRES_DB: mcontrol
+  firebase-emulator:
+    image: andreysenov/firebase-tools:latest
+    container_name: mcontrol-firebase
     ports:
-      - "5432:5432"
+      - "4000:4000"   # Emulator UI
+      - "8080:8080"   # Firestore
+      - "9099:9099"   # Auth
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./firebase.json:/home/node/firebase.json:ro
+    command: firebase emulators:start --project mcontrol-dev
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U mcontrol"]
-      interval: 5s
+      test: ["CMD", "curl", "-f", "http://localhost:4000"]
+      interval: 10s
       timeout: 5s
       retries: 5
-
-  redis:
-    image: redis:7-alpine
-    container_name: mcontrol-redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-volumes:
-  postgres_data:
-  redis_data:

@@ -1,24 +1,40 @@
-"""User model."""
+"""User document model."""
 
-import uuid
+from dataclasses import dataclass, field
+from datetime import UTC, datetime
+from typing import Any, ClassVar
 
-from sqlalchemy import String
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
-
-from app.models import Base, TimestampMixin
+from app.models import BaseDocument
 
 
-class User(Base, TimestampMixin):
-    """User account model."""
+@dataclass
+class User(BaseDocument):
+    """User account document model."""
 
-    __tablename__ = "users"
+    COLLECTION: ClassVar[str] = "users"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    firebase_uid: Mapped[str] = mapped_column(String(128), unique=True, index=True)
-    email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
-    display_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    avatar_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    firebase_uid: str = ""
+    email: str = ""
+    display_name: str | None = None
+    avatar_url: str | None = None
+
+    # Override base fields with defaults
+    id: str = ""
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+
+    @classmethod
+    def from_dict(cls, doc_id: str, data: dict[str, Any]) -> "User":
+        """Create User instance from Firestore document data."""
+        return cls(
+            id=doc_id,
+            firebase_uid=data.get("firebase_uid", ""),
+            email=data.get("email", ""),
+            display_name=data.get("display_name"),
+            avatar_url=data.get("avatar_url"),
+            created_at=data.get("created_at", datetime.now(UTC)),
+            updated_at=data.get("updated_at", datetime.now(UTC)),
+        )
 
     def __repr__(self) -> str:
         return f"<User {self.email}>"

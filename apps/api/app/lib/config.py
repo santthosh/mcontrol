@@ -10,14 +10,8 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-    # Database
-    database_url: str = "postgresql+asyncpg://mcontrol:mcontrol@localhost:5432/mcontrol"
-
-    # Redis
-    redis_url: str = "redis://localhost:6379"
-
-    # Firebase Auth
-    firebase_project_id: str = ""
+    # Firebase
+    firebase_project_id: str = "mcontrol-dev"
 
     # Development mode
     auth_disabled: bool = True

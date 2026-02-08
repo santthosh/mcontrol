@@ -1,6 +1,11 @@
-.PHONY: dev dev-api dev-desktop build test lint typecheck docker-up docker-down clean release version
+.PHONY: dev dev-api dev-desktop build test lint typecheck docker-up docker-down clean install
 
-# Start everything: Docker (Postgres + Redis) + API + Desktop
+# Firebase emulator environment variables
+export FIRESTORE_EMULATOR_HOST=localhost:8080
+export FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
+export FIREBASE_PROJECT_ID=mcontrol-dev
+
+# Start everything: Docker (Firebase Emulator) + API + Desktop
 dev: docker-up
 	@echo "Starting API and Desktop..."
 	@trap 'make docker-down' EXIT; \
@@ -18,12 +23,12 @@ dev-desktop:
 	@echo "Starting Desktop app..."
 	cd apps/desktop && pnpm dev
 
-# Start Docker containers
+# Start Docker containers (Firebase Emulator)
 docker-up:
-	@echo "Starting Docker containers..."
+	@echo "Starting Firebase Emulator..."
 	docker-compose up -d
-	@echo "Waiting for services to be healthy..."
-	@sleep 3
+	@echo "Waiting for emulator to be ready..."
+	@sleep 5
 
 # Stop Docker containers
 docker-down:
@@ -37,7 +42,7 @@ build:
 # Run all tests
 test:
 	@echo "Running API tests..."
-	cd apps/api && .venv/bin/pytest
+	cd apps/api && FIRESTORE_EMULATOR_HOST=localhost:8080 FIREBASE_PROJECT_ID=mcontrol-dev .venv/bin/pytest
 	@echo "Running Desktop tests..."
 	pnpm --filter desktop test
 
@@ -70,15 +75,6 @@ clean:
 install:
 	pnpm install
 	cd apps/api && pip install -e ".[dev]"
-
-# Run database migrations
-migrate:
-	cd apps/api && .venv/bin/alembic upgrade head
-
-# Create a new migration
-migration:
-	@read -p "Migration message: " msg; \
-	cd apps/api && .venv/bin/alembic revision --autogenerate -m "$$msg"
 
 # Sync version across all files (for testing locally)
 # Usage: make version VERSION=2026.02.07.1
