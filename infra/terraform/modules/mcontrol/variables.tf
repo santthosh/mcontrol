@@ -79,3 +79,9 @@ variable "create_artifact_registry" {
   type        = bool
   default     = true
 }
+
+variable "api_domain" {
+  description = "Custom domain for the API (e.g., api.mcontrol.ai)"
+  type        = string
+  default     = null
+}

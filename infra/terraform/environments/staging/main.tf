@@ -32,6 +32,9 @@ module "mcontrol" {
   api_max_instances        = 5
   allow_unauthenticated    = true
   create_artifact_registry = false  # Created by dev environment
+
+  # Custom domain
+  api_domain = "staging-api.mcontrol.ai"
 }
 
 output "api_url" {
@@ -48,4 +51,8 @@ output "github_actions_service_account" {
 
 output "workload_identity_provider" {
   value = module.mcontrol.workload_identity_provider
+}
+
+output "api_domain_dns_records" {
+  value = module.mcontrol.api_domain_dns_records
 }

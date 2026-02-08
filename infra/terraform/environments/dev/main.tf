@@ -32,6 +32,9 @@ module "mcontrol" {
   api_min_instances     = 0  # Scale to zero when idle
   api_max_instances     = 2
   allow_unauthenticated = true
+
+  # Custom domain
+  api_domain = "dev-api.mcontrol.ai"
 }
 
 # Outputs
@@ -49,4 +52,8 @@ output "github_actions_service_account" {
 
 output "workload_identity_provider" {
   value = module.mcontrol.workload_identity_provider
+}
+
+output "api_domain_dns_records" {
+  value = module.mcontrol.api_domain_dns_records
 }

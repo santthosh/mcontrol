@@ -36,3 +36,18 @@ output "workload_identity_provider" {
   description = "Workload Identity Provider resource name for GitHub Actions"
   value       = "projects/${data.google_project.current.number}/locations/global/workloadIdentityPools/github/providers/github-actions"
 }
+
+# Domain mapping outputs
+output "api_domain" {
+  description = "Custom domain for the API"
+  value       = var.api_domain
+}
+
+output "api_domain_dns_records" {
+  description = "DNS records to configure for the custom domain"
+  value = var.api_domain != null ? {
+    type  = "CNAME"
+    name  = var.api_domain
+    value = "ghs.googlehosted.com."
+  } : null
+}
