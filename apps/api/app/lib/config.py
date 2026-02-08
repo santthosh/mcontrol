@@ -13,12 +13,17 @@ class Settings(BaseSettings):
     # Firebase
     firebase_project_id: str = "mcontrol-dev"
 
+    # Google OAuth
+    google_client_id: str = ""
+    google_client_secret: str = ""
+
     # Development mode
     auth_disabled: bool = True
 
     # API Settings
     api_host: str = "0.0.0.0"
     api_port: int = 8000
+    api_base_url: str = "http://localhost:8000"
 
 
 @lru_cache

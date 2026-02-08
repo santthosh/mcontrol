@@ -1,6 +1,24 @@
 import { ConnectionStatus } from "./components/ConnectionStatus";
+import { LoginScreen } from "./components/LoginScreen";
+import { UserMenu } from "./components/UserMenu";
+import { AuthProvider } from "./contexts/AuthContext";
+import { useAuth } from "./hooks/useAuth";
 
-function App() {
+function AppContent() {
+  const { isLoading, isAuthenticated } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-gray-400 text-sm">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginScreen />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
@@ -9,7 +27,10 @@ function App() {
           <h1 className="text-xl font-semibold text-gray-900">
             Mission Control
           </h1>
-          <ConnectionStatus />
+          <div className="flex items-center gap-3">
+            <ConnectionStatus />
+            <UserMenu />
+          </div>
         </div>
       </header>
 
@@ -34,6 +55,14 @@ function App() {
         </p>
       </footer>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 
