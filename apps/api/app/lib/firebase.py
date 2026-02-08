@@ -2,10 +2,13 @@
 
 import os
 from functools import lru_cache
+from typing import TYPE_CHECKING
 
 import firebase_admin
 from firebase_admin import credentials, firestore
-from google.cloud.firestore import Client
+
+if TYPE_CHECKING:
+    from google.cloud.firestore_v1 import Client
 
 from app.lib.config import get_settings
 
@@ -37,7 +40,7 @@ def _initialize_app() -> firebase_admin.App:
 
 
 @lru_cache
-def get_firestore_client() -> Client:
+def get_firestore_client() -> "Client":
     """Get cached Firestore client instance."""
     _initialize_app()
     return firestore.client()

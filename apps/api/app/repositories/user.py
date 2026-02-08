@@ -1,6 +1,9 @@
 """User repository for Firestore operations."""
 
-from google.cloud.firestore import Client
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from google.cloud.firestore_v1 import Client
 
 from app.models.user import User
 from app.repositories.base import BaseRepository
@@ -9,7 +12,7 @@ from app.repositories.base import BaseRepository
 class UserRepository(BaseRepository[User]):
     """Repository for User document operations."""
 
-    def __init__(self, db: Client):
+    def __init__(self, db: "Client"):
         """Initialize user repository."""
         super().__init__(db, User)
 
