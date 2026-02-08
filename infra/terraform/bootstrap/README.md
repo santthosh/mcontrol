@@ -54,12 +54,14 @@ gcloud iam workload-identity-pools create "github" \
   --display-name="GitHub Actions"
 
 # Create OIDC Provider for GitHub
+# Replace YOUR_GITHUB_ORG with your GitHub username or organization
 gcloud iam workload-identity-pools providers create-oidc "github-actions" \
   --project=$PROJECT_ID \
   --location="global" \
   --workload-identity-pool="github" \
   --display-name="GitHub Actions" \
   --attribute-mapping="google.subject=assertion.sub,attribute.actor=assertion.actor,attribute.repository=assertion.repository,attribute.repository_owner=assertion.repository_owner" \
+  --attribute-condition="assertion.repository_owner == 'YOUR_GITHUB_ORG'" \
   --issuer-uri="https://token.actions.githubusercontent.com"
 ```
 

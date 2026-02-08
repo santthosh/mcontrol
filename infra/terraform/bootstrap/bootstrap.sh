@@ -25,8 +25,12 @@ if [ -z "${REGION:-}" ]; then
 fi
 
 if [ -z "${GITHUB_REPO:-}" ]; then
-  read -p "Enter GitHub repository (owner/repo): " GITHUB_REPO
+  read -p "Enter GitHub repository (owner/repo, e.g., santthosh/mcontrol): " GITHUB_REPO
 fi
+
+# Strip https://github.com/ prefix if provided
+GITHUB_REPO="${GITHUB_REPO#https://github.com/}"
+GITHUB_REPO="${GITHUB_REPO%.git}"
 
 STATE_BUCKET="${STATE_BUCKET:-mcontrol-terraform-state}"
 
@@ -88,6 +92,7 @@ else
     --workload-identity-pool="github" \
     --display-name="GitHub Actions" \
     --attribute-mapping="google.subject=assertion.sub,attribute.actor=assertion.actor,attribute.repository=assertion.repository,attribute.repository_owner=assertion.repository_owner" \
+    --attribute-condition="assertion.repository_owner == '${GITHUB_REPO%%/*}'" \
     --issuer-uri="https://token.actions.githubusercontent.com"
 fi
 
