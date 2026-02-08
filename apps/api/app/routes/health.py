@@ -4,20 +4,32 @@ import os
 
 from fastapi import APIRouter
 
-from app.lib.firebase import get_firestore_client
-
 router = APIRouter(tags=["health"])
 
 
 @router.get("/health")
 async def health_check() -> dict:
-    """Return API health status with Firestore connectivity check."""
+    """Return API health status.
+
+    This endpoint is used by Cloud Run startup/liveness probes.
+    Returns 200 as long as the API is running - Firestore connectivity
+    is checked separately in /health/ready.
+    """
+    return {
+        "status": "ok",
+        "version": "0.0.1",
+    }
+
+
+@router.get("/health/ready")
+async def readiness_check() -> dict:
+    """Check if all services are ready (including Firestore)."""
+    from app.lib.firebase import get_firestore_client
+
     firestore_status = "ok"
     firestore_error = None
     try:
-        # Attempt a simple Firestore operation to verify connectivity
         db = get_firestore_client()
-        # List collections is a lightweight operation to verify connection
         list(db.collections())
     except Exception as e:
         firestore_status = "error"
@@ -33,7 +45,6 @@ async def health_check() -> dict:
         },
     }
 
-    # Include debug info if there's an error (useful for CI debugging)
     if firestore_error:
         result["debug"] = {
             "firestore_error": firestore_error,
