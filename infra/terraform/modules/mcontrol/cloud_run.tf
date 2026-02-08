@@ -15,8 +15,9 @@ resource "google_cloud_run_v2_service" "api" {
     }
 
     containers {
-      # Use provided image or default to artifact registry
-      image = coalesce(var.api_image, "${local.api_image_url}:${var.environment}")
+      # Use provided image, or placeholder for initial deployment
+      # CI/CD will update this with the real image after first push
+      image = coalesce(var.api_image, "us-docker.pkg.dev/cloudrun/container/hello")
 
       resources {
         limits = {
