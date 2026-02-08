@@ -8,9 +8,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy pyproject.toml for dependency installation
+COPY pyproject.toml .
+
 # Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir --user -r requirements.txt
+RUN pip install --no-cache-dir --user .
 
 # Production stage
 FROM python:3.12-slim
@@ -23,8 +25,6 @@ ENV PATH=/root/.local/bin:$PATH
 
 # Copy application code
 COPY app/ ./app/
-COPY alembic/ ./alembic/
-COPY alembic.ini .
 
 # Create non-root user
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
