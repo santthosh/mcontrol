@@ -5,6 +5,23 @@ export FIRESTORE_EMULATOR_HOST=localhost:8080
 export FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
 export FIREBASE_PROJECT_ID=mcontrol-dev
 
+# Desktop environment (local, dev, staging, production)
+# Usage: make dev-desktop ENV=dev
+ENV ?= local
+
+# Map ENV to API URL
+ifeq ($(ENV),local)
+  API_URL=http://localhost:8000/api
+else ifeq ($(ENV),dev)
+  API_URL=https://dev-api.mcontrol.ai/api
+else ifeq ($(ENV),staging)
+  API_URL=https://staging-api.mcontrol.ai/api
+else ifeq ($(ENV),production)
+  API_URL=https://api.mcontrol.ai/api
+else
+  API_URL=http://localhost:8000/api
+endif
+
 # Start everything: Docker (Firebase Emulator) + API + Desktop
 dev: docker-up
 	@echo "Starting API and Desktop..."
@@ -18,10 +35,12 @@ dev-api: docker-up
 	@echo "Starting API server..."
 	cd apps/api && .venv/bin/uvicorn app.main:app --reload --port 8000
 
-# Desktop app only (expects API running)
+# Desktop app only (expects API running or remote API)
+# Usage: make dev-desktop ENV=dev
 dev-desktop:
-	@echo "Starting Desktop app..."
-	cd apps/desktop && pnpm dev
+	@echo "Starting Desktop app (ENV=$(ENV))..."
+	@echo "API URL: $(API_URL)"
+	cd apps/desktop && VITE_API_URL=$(API_URL) pnpm dev
 
 # Start Docker containers (Firebase Emulator)
 docker-up:

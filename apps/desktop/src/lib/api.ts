@@ -2,7 +2,8 @@
  * API client utilities for communicating with the backend.
  */
 
-const API_BASE_URL = "http://localhost:8000/api";
+// API base URL from environment variable, defaults to localhost
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
 export interface HealthResponse {
   status: "ok" | "error";
