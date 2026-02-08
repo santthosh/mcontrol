@@ -1,8 +1,9 @@
 # Google OAuth secrets in Secret Manager
 #
-# The secret *values* must be populated manually (or via CI) after terraform apply:
-#   echo -n "CLIENT_ID" | gcloud secrets versions add google-client-id-ENV --data-file=-
-#   echo -n "CLIENT_SECRET" | gcloud secrets versions add google-client-secret-ENV --data-file=-
+# Terraform creates the secrets with a placeholder value so Cloud Run
+# can reference them immediately. Replace with real values:
+#   echo -n "REAL_CLIENT_ID" | gcloud secrets versions add google-client-id-ENV --data-file=-
+#   echo -n "REAL_SECRET" | gcloud secrets versions add google-client-secret-ENV --data-file=-
 
 resource "google_secret_manager_secret" "google_client_id" {
   project   = var.project_id
@@ -17,6 +18,16 @@ resource "google_secret_manager_secret" "google_client_id" {
   depends_on = [google_project_service.apis]
 }
 
+resource "google_secret_manager_secret_version" "google_client_id_initial" {
+  secret      = google_secret_manager_secret.google_client_id.id
+  secret_data = "PLACEHOLDER"
+
+  lifecycle {
+    # Don't revert to placeholder when real value is set via gcloud CLI
+    ignore_changes = [secret_data]
+  }
+}
+
 resource "google_secret_manager_secret" "google_client_secret" {
   project   = var.project_id
   secret_id = "google-client-secret-${var.environment}"
@@ -28,6 +39,16 @@ resource "google_secret_manager_secret" "google_client_secret" {
   }
 
   depends_on = [google_project_service.apis]
+}
+
+resource "google_secret_manager_secret_version" "google_client_secret_initial" {
+  secret      = google_secret_manager_secret.google_client_secret.id
+  secret_data = "PLACEHOLDER"
+
+  lifecycle {
+    # Don't revert to placeholder when real value is set via gcloud CLI
+    ignore_changes = [secret_data]
+  }
 }
 
 # Grant the Cloud Run API service account access to read these secrets
