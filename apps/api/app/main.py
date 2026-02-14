@@ -1,9 +1,20 @@
 """FastAPI application factory."""
 
+import logging
+import sys
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes import auth, health, keys, websocket
+
+# Configure logging to stdout so Cloud Run captures it
+logging.basicConfig(
+    stream=sys.stdout,
+    level=logging.INFO,
+    format="%(levelname)s %(name)s: %(message)s",
+    force=True,
+)
 
 
 def create_app() -> FastAPI:

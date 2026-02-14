@@ -57,6 +57,14 @@ async def exchange_google_auth_code(body: GoogleExchangeRequest) -> AuthTokenRes
     if not settings.google_client_id or not settings.google_client_secret:
         raise HTTPException(status_code=500, detail="Google OAuth not configured")
 
+    logger.info(
+        "OAuth exchange: client_id=%s...%s redirect_uri=%s code_len=%d",
+        settings.google_client_id[:8],
+        settings.google_client_id[-4:],
+        body.redirect_uri,
+        len(body.code),
+    )
+
     # Exchange authorization code for Google tokens
     async with httpx.AsyncClient() as client:
         token_resp = await client.post(
@@ -70,13 +78,16 @@ async def exchange_google_auth_code(body: GoogleExchangeRequest) -> AuthTokenRes
             },
         )
         if token_resp.status_code != 200:
-            print(
-                f"ERROR: Google token exchange failed (status={token_resp.status_code}): {token_resp.text}"
+            logger.error(
+                "Google token exchange failed (status=%s): %s",
+                token_resp.status_code,
+                token_resp.text,
             )
             raise HTTPException(
                 status_code=400,
                 detail=f"Google token exchange failed: {token_resp.text}",
             )
+        logger.info("Google token exchange succeeded")
         google_tokens = token_resp.json()
 
     # Exchange Google credential for Firebase auth tokens
@@ -228,6 +239,11 @@ async def _sign_in_with_google_credential(
             params={"key": settings.google_client_id},
         )
         if resp.status_code != 200:
+            logger.error(
+                "Firebase signInWithIdp failed (status=%s): %s",
+                resp.status_code,
+                resp.text,
+            )
             raise HTTPException(
                 status_code=400,
                 detail=f"Firebase signInWithIdp failed: {resp.text}",
