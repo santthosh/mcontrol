@@ -68,6 +68,7 @@ export const Credential = z.object({
   name: z.string().min(1).max(255),
   type: CredentialType,
   provider: Provider,
+  keyHint: z.string().optional(),
   // Note: actual secret values are never exposed in API responses
   createdAt: DateTimeString,
   updatedAt: DateTimeString,

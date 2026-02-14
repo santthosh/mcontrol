@@ -86,6 +86,90 @@ export async function exchangeGoogleAuthCode(
   return response.json();
 }
 
+// ---------------------------------------------------------------------------
+// Credentials (API keys)
+// ---------------------------------------------------------------------------
+
+export interface Credential {
+  id: string;
+  provider: string;
+  name: string;
+  key_hint: string;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Create a new encrypted API key credential.
+ */
+export async function createKey(
+  provider: string,
+  name: string,
+  key: string
+): Promise<Credential> {
+  const response = await fetchWithAuth(`${API_BASE_URL}/keys`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ provider, name, key }),
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to create key: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
+ * List all credentials for the authenticated user (masked).
+ */
+export async function listKeys(): Promise<Credential[]> {
+  const response = await fetchWithAuth(`${API_BASE_URL}/keys`);
+  if (!response.ok) {
+    throw new Error(`Failed to list keys: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
+ * Get a single credential by ID (masked).
+ */
+export async function getKey(id: string): Promise<Credential> {
+  const response = await fetchWithAuth(`${API_BASE_URL}/keys/${id}`);
+  if (!response.ok) {
+    throw new Error(`Failed to get key: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
+ * Update a credential's name and/or re-encrypt its key.
+ */
+export async function updateKey(
+  id: string,
+  data: { name?: string; key?: string }
+): Promise<Credential> {
+  const response = await fetchWithAuth(`${API_BASE_URL}/keys/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to update key: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
+ * Delete a credential.
+ */
+export async function deleteKey(id: string): Promise<void> {
+  const response = await fetchWithAuth(`${API_BASE_URL}/keys/${id}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to delete key: ${response.statusText}`);
+  }
+}
+
 /**
  * Create a WebSocket connection to the API.
  */

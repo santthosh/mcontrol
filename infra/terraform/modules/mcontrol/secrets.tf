@@ -65,3 +65,34 @@ resource "google_secret_manager_secret_iam_member" "api_google_client_secret" {
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.api.email}"
 }
+
+# Credential encryption key for AES-256-GCM encrypted API key storage
+resource "google_secret_manager_secret" "credential_encryption_key" {
+  project   = var.project_id
+  secret_id = "credential-encryption-key-${var.environment}"
+
+  labels = local.labels
+
+  replication {
+    auto {}
+  }
+
+  depends_on = [google_project_service.apis]
+}
+
+resource "google_secret_manager_secret_version" "credential_encryption_key_initial" {
+  secret      = google_secret_manager_secret.credential_encryption_key.id
+  secret_data = "PLACEHOLDER"
+
+  lifecycle {
+    # Don't revert to placeholder when real value is set via gcloud CLI
+    ignore_changes = [secret_data]
+  }
+}
+
+resource "google_secret_manager_secret_iam_member" "api_credential_encryption_key" {
+  project   = var.project_id
+  secret_id = google_secret_manager_secret.credential_encryption_key.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.api.email}"
+}

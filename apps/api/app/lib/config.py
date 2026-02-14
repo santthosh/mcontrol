@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     google_client_id: str = ""
     google_client_secret: str = ""
 
+    # Credential encryption (base64-encoded 32-byte AES-256-GCM key)
+    credential_encryption_key: str = ""
+
     # Development mode
     auth_disabled: bool = True
 
