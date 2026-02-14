@@ -70,10 +70,8 @@ async def exchange_google_auth_code(body: GoogleExchangeRequest) -> AuthTokenRes
             },
         )
         if token_resp.status_code != 200:
-            logger.error(
-                "Google token exchange failed (status=%s): %s",
-                token_resp.status_code,
-                token_resp.text,
+            print(
+                f"ERROR: Google token exchange failed (status={token_resp.status_code}): {token_resp.text}"
             )
             raise HTTPException(
                 status_code=400,
