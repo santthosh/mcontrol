@@ -1,5 +1,6 @@
 """Authentication routes for Google SSO via loopback redirect OAuth."""
 
+import logging
 import os
 
 import httpx
@@ -10,6 +11,8 @@ from app.lib.config import get_settings
 from app.lib.firebase import get_firestore_client
 from app.middleware.auth import CurrentUser
 from app.repositories.user import UserRepository
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["auth"])
 
@@ -67,6 +70,11 @@ async def exchange_google_auth_code(body: GoogleExchangeRequest) -> AuthTokenRes
             },
         )
         if token_resp.status_code != 200:
+            logger.error(
+                "Google token exchange failed (status=%s): %s",
+                token_resp.status_code,
+                token_resp.text,
+            )
             raise HTTPException(
                 status_code=400,
                 detail=f"Google token exchange failed: {token_resp.text}",
