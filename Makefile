@@ -1,5 +1,10 @@
 .PHONY: dev dev-api dev-desktop build test lint typecheck docker-up docker-down clean install
 
+# Load local .env if it exists (gitignored)
+-include .env
+export GOOGLE_CLIENT_ID
+export GOOGLE_CLIENT_SECRET
+
 # Firebase emulator environment variables
 export FIRESTORE_EMULATOR_HOST=localhost:8080
 export FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
@@ -26,8 +31,8 @@ endif
 dev: docker-up
 	@echo "Starting API and Desktop..."
 	@trap 'make docker-down' EXIT; \
-	(cd apps/api && .venv/bin/uvicorn app.main:app --reload --port 8000) & \
-	(cd apps/desktop && pnpm dev) & \
+	(cd apps/api && GOOGLE_CLIENT_ID=$(GOOGLE_CLIENT_ID) GOOGLE_CLIENT_SECRET=$(GOOGLE_CLIENT_SECRET) .venv/bin/uvicorn app.main:app --reload --port 8000) & \
+	(cd apps/desktop && VITE_GOOGLE_CLIENT_ID=$(GOOGLE_CLIENT_ID) pnpm dev) & \
 	wait
 
 # Docker + API server only
@@ -40,7 +45,11 @@ dev-api: docker-up
 dev-desktop:
 	@echo "Starting Desktop app (ENV=$(ENV))..."
 	@echo "API URL: $(API_URL)"
+ifeq ($(ENV),local)
+	cd apps/desktop && VITE_API_URL=$(API_URL) VITE_GOOGLE_CLIENT_ID=$(GOOGLE_CLIENT_ID) pnpm dev
+else
 	cd apps/desktop && VITE_API_URL=$(API_URL) pnpm dev
+endif
 
 # Start Docker containers (Firebase Emulator)
 docker-up:

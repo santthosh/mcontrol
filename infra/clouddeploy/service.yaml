@@ -27,18 +27,20 @@ spec:
               cpu: "1"
               memory: 512Mi
           env:
-            - name: DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  key: latest
-                  name: database-url
-            - name: REDIS_URL
-              valueFrom:
-                secretKeyRef:
-                  key: latest
-                  name: redis-url
             - name: FIREBASE_PROJECT_ID
               value: ${PROJECT_ID}
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: google-client-id
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: google-client-secret
+            - name: API_BASE_URL
+              value: ${API_BASE_URL}
           startupProbe:
             httpGet:
               path: /api/health

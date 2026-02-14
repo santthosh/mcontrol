@@ -42,6 +42,32 @@ resource "google_cloud_run_v2_service" "api" {
         value = var.environment
       }
 
+      env {
+        name  = "API_BASE_URL"
+        value = var.api_base_url
+      }
+
+      # Google OAuth secrets from Secret Manager
+      env {
+        name = "GOOGLE_CLIENT_ID"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.google_client_id.secret_id
+            version = "latest"
+          }
+        }
+      }
+
+      env {
+        name = "GOOGLE_CLIENT_SECRET"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.google_client_secret.secret_id
+            version = "latest"
+          }
+        }
+      }
+
       # Health check endpoint
       startup_probe {
         http_get {
