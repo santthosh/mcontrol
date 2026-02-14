@@ -33,6 +33,11 @@ resource "google_cloud_run_v2_service" "api" {
       }
 
       env {
+        name  = "FIRESTORE_DATABASE"
+        value = "mcontrol-${var.environment}"
+      }
+
+      env {
         name  = "AUTH_DISABLED"
         value = var.environment == "dev" ? "true" : "false"
       }
@@ -45,6 +50,17 @@ resource "google_cloud_run_v2_service" "api" {
       env {
         name  = "API_BASE_URL"
         value = var.api_base_url
+      }
+
+      # Firebase Web API Key from Secret Manager
+      env {
+        name = "FIREBASE_API_KEY"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.firebase_api_key.secret_id
+            version = "latest"
+          }
+        }
       }
 
       # Credential encryption key from Secret Manager

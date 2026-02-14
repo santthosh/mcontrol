@@ -66,6 +66,36 @@ resource "google_secret_manager_secret_iam_member" "api_google_client_secret" {
   member    = "serviceAccount:${google_service_account.api.email}"
 }
 
+# Firebase Web API Key
+resource "google_secret_manager_secret" "firebase_api_key" {
+  project   = var.project_id
+  secret_id = "firebase-api-key-${var.environment}"
+
+  labels = local.labels
+
+  replication {
+    auto {}
+  }
+
+  depends_on = [google_project_service.apis]
+}
+
+resource "google_secret_manager_secret_version" "firebase_api_key_initial" {
+  secret      = google_secret_manager_secret.firebase_api_key.id
+  secret_data = "PLACEHOLDER"
+
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
+}
+
+resource "google_secret_manager_secret_iam_member" "api_firebase_api_key" {
+  project   = var.project_id
+  secret_id = google_secret_manager_secret.firebase_api_key.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.api.email}"
+}
+
 # Credential encryption key for AES-256-GCM encrypted API key storage
 resource "google_secret_manager_secret" "credential_encryption_key" {
   project   = var.project_id

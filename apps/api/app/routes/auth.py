@@ -236,7 +236,7 @@ async def _sign_in_with_google_credential(
                 "returnIdpCredential": True,
                 "returnSecureToken": True,
             },
-            params={"key": settings.google_client_id},
+            params={"key": settings.firebase_api_key or settings.google_client_id},
         )
         if resp.status_code != 200:
             logger.error(

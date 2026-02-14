@@ -10,12 +10,16 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-    # Firebase
+    # Firebase / Firestore
     firebase_project_id: str = "mcontrol-dev"
+    firestore_database: str = "(default)"
 
     # Google OAuth
     google_client_id: str = ""
     google_client_secret: str = ""
+
+    # Firebase Web API Key (from Firebase Console > Project Settings)
+    firebase_api_key: str = ""
 
     # Credential encryption (base64-encoded 32-byte AES-256-GCM key)
     credential_encryption_key: str = ""
