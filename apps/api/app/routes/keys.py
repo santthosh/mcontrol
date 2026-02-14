@@ -61,8 +61,12 @@ def _to_response(doc: CredentialDocument) -> KeyResponse:
         provider=doc.provider,
         name=doc.name,
         key_hint=doc.key_suffix,
-        created_at=doc.created_at.isoformat() if hasattr(doc.created_at, "isoformat") else str(doc.created_at),
-        updated_at=doc.updated_at.isoformat() if hasattr(doc.updated_at, "isoformat") else str(doc.updated_at),
+        created_at=doc.created_at.isoformat()
+        if hasattr(doc.created_at, "isoformat")
+        else str(doc.created_at),
+        updated_at=doc.updated_at.isoformat()
+        if hasattr(doc.updated_at, "isoformat")
+        else str(doc.updated_at),
     )
 
 

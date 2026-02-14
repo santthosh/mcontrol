@@ -20,8 +20,8 @@ def _get_key() -> bytes:
     if not raw:
         raise RuntimeError(
             "CREDENTIAL_ENCRYPTION_KEY is not set. "
-            "Generate one with: python -c \"import secrets,base64; "
-            "print(base64.b64encode(secrets.token_bytes(32)).decode())\""
+            'Generate one with: python -c "import secrets,base64; '
+            'print(base64.b64encode(secrets.token_bytes(32)).decode())"'
         )
 
     key = base64.b64decode(raw)
