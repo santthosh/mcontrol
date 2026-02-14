@@ -1820,6 +1820,8 @@ dependencies = [
  "tauri-build",
  "tauri-plugin-http",
  "tauri-plugin-shell",
+ "tokio",
+ "url",
 ]
 
 [[package]]

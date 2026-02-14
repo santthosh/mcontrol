@@ -4,6 +4,7 @@
   "description": "Default capabilities for the Mission Control app",
   "windows": ["*"],
   "permissions": [
+    "core:default",
     "http:default",
     {
       "identifier": "http:allow-fetch",
@@ -22,6 +23,9 @@
         },
         {
           "url": "https://securetoken.googleapis.com/**"
+        },
+        {
+          "url": "http://127.0.0.1:*/**"
         }
       ]
     },

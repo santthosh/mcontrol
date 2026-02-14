@@ -1,10 +1,13 @@
 /**
- * Authentication module — handles Google SSO via server-mediated OAuth
- * and dev sign-in via Firebase Auth emulator.
+ * Authentication module — handles Google SSO via loopback redirect OAuth (RFC 8252).
+ * The desktop app starts a local HTTP server, Google redirects to it with the auth code,
+ * and the code is exchanged for Firebase tokens via the API.
  */
 
+import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { open } from "@tauri-apps/plugin-shell";
-import { getApiUrl } from "./api";
+import { exchangeGoogleAuthCode } from "./api";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -46,14 +49,6 @@ export function saveAuth(auth: StoredAuth): void {
 
 export function clearAuth(): void {
   localStorage.removeItem(AUTH_STORAGE_KEY);
-}
-
-// ---------------------------------------------------------------------------
-// Environment helpers
-// ---------------------------------------------------------------------------
-
-export function isEmulatorMode(): boolean {
-  return !!import.meta.env.VITE_FIREBASE_AUTH_EMULATOR_HOST;
 }
 
 // ---------------------------------------------------------------------------
@@ -124,93 +119,58 @@ export async function getValidToken(): Promise<string | null> {
 }
 
 // ---------------------------------------------------------------------------
-// Google SSO (server-mediated)
+// Google SSO (loopback redirect)
 // ---------------------------------------------------------------------------
 
-const POLL_INTERVAL_MS = 1500;
-const POLL_TIMEOUT_MS = 5 * 60 * 1000;
+const OAUTH_TIMEOUT_MS = 5 * 60 * 1000;
 
 /**
- * Start Google SSO flow: calls API to get OAuth URL, opens system browser,
- * polls for completion.
+ * Start Google SSO flow via loopback redirect:
+ * 1. Start a local HTTP listener via Tauri command
+ * 2. Build and open Google OAuth URL in system browser
+ * 3. Listen for the oauth-callback event with the auth code
+ * 4. Exchange the code for Firebase tokens via the API
  */
 export async function signInWithGoogle(): Promise<StoredAuth> {
-  const apiUrl = getApiUrl();
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  if (!clientId) {
+    throw new Error("Google OAuth not configured (VITE_GOOGLE_CLIENT_ID missing)");
+  }
 
-  // Step 1: Start OAuth session
-  const startResp = await fetch(`${apiUrl}/auth/google/start`, {
-    method: "POST",
+  // Step 1: Start loopback listener — returns the port
+  const port = await invoke<number>("start_oauth_listener");
+  const redirectUri = `http://127.0.0.1:${port}`;
+
+  // Step 2: Build Google OAuth URL and open in browser
+  const params = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    response_type: "code",
+    scope: "openid email profile",
+    access_type: "offline",
+    prompt: "consent",
   });
-  if (!startResp.ok) {
-    throw new Error("Failed to start Google sign-in");
-  }
-  const { session_id, auth_url } = await startResp.json();
+  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+  await open(authUrl);
 
-  // Step 2: Open system browser
-  await open(auth_url);
+  // Step 3: Wait for the oauth-callback event from the Rust listener
+  const code = await new Promise<string>((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(new Error("Sign-in timed out"));
+    }, OAUTH_TIMEOUT_MS);
 
-  // Step 3: Poll for result
-  const deadline = Date.now() + POLL_TIMEOUT_MS;
-  while (Date.now() < deadline) {
-    await sleep(POLL_INTERVAL_MS);
-
-    const pollResp = await fetch(
-      `${apiUrl}/auth/google/poll?session_id=${encodeURIComponent(session_id)}`
-    );
-    if (!pollResp.ok) {
-      throw new Error("Polling failed");
-    }
-
-    const result = await pollResp.json();
-
-    if (result.status === "complete") {
-      const auth: StoredAuth = {
-        idToken: result.id_token,
-        refreshToken: result.refresh_token,
-        // Firebase ID tokens expire after 1 hour
-        expiresAt: Date.now() + 3600 * 1000,
-        user: {
-          uid: result.user.uid,
-          email: result.user.email,
-          displayName: result.user.display_name,
-          avatarUrl: result.user.avatar_url,
-        },
-      };
-      saveAuth(auth);
-      return auth;
-    }
-
-    if (result.status === "error") {
-      throw new Error(result.detail || "Authentication failed");
-    }
-
-    // status === "pending" — keep polling
-  }
-
-  throw new Error("Sign-in timed out");
-}
-
-// ---------------------------------------------------------------------------
-// Dev / emulator sign-in
-// ---------------------------------------------------------------------------
-
-/**
- * Sign in via the Firebase Auth emulator with just an email address.
- */
-export async function signInDev(email: string): Promise<StoredAuth> {
-  const apiUrl = getApiUrl();
-
-  const resp = await fetch(`${apiUrl}/auth/dev/signin`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email }),
+    listen<{ code: string }>("oauth-callback", (event) => {
+      clearTimeout(timeout);
+      resolve(event.payload.code);
+    }).catch((err) => {
+      clearTimeout(timeout);
+      reject(err);
+    });
   });
 
-  if (!resp.ok) {
-    throw new Error("Dev sign-in failed");
-  }
+  // Step 4: Exchange the code for Firebase tokens via the API
+  const data = await exchangeGoogleAuthCode(code, redirectUri);
 
-  const data = await resp.json();
   const auth: StoredAuth = {
     idToken: data.id_token,
     refreshToken: data.refresh_token,
@@ -224,12 +184,4 @@ export async function signInDev(email: string): Promise<StoredAuth> {
   };
   saveAuth(auth);
   return auth;
-}
-
-// ---------------------------------------------------------------------------
-// Utilities
-// ---------------------------------------------------------------------------
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }

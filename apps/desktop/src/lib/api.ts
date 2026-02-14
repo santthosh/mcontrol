@@ -65,6 +65,28 @@ export async function getCurrentUser(): Promise<UserProfile> {
 }
 
 /**
+ * Exchange a Google OAuth authorization code for Firebase auth tokens.
+ */
+export async function exchangeGoogleAuthCode(
+  code: string,
+  redirectUri: string
+): Promise<{
+  id_token: string;
+  refresh_token: string;
+  user: UserProfile;
+}> {
+  const response = await fetch(`${API_BASE_URL}/auth/google/exchange`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code, redirect_uri: redirectUri }),
+  });
+  if (!response.ok) {
+    throw new Error(`Google auth exchange failed: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
  * Create a WebSocket connection to the API.
  */
 export function createWebSocket(): WebSocket {

@@ -9,8 +9,6 @@ import {
   clearAuth,
   getStoredAuth,
   getValidToken,
-  isEmulatorMode,
-  signInDev,
   signInWithGoogle,
   type AuthUser,
 } from "../lib/auth";
@@ -64,19 +62,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [scheduleRefresh]);
 
-  const signIn = useCallback(
-    async (email?: string) => {
-      if (isEmulatorMode() && email) {
-        const result = await signInDev(email);
-        setUser(result.user);
-      } else {
-        const result = await signInWithGoogle();
-        setUser(result.user);
-      }
-      scheduleRefresh();
-    },
-    [scheduleRefresh]
-  );
+  const signIn = useCallback(async () => {
+    const result = await signInWithGoogle();
+    setUser(result.user);
+    scheduleRefresh();
+  }, [scheduleRefresh]);
 
   const signOut = useCallback(() => {
     clearAuth();

@@ -5,7 +5,7 @@ export interface AuthState {
   isLoading: boolean;
   isAuthenticated: boolean;
   user: AuthUser | null;
-  signIn: (email?: string) => Promise<void>;
+  signIn: () => Promise<void>;
   signOut: () => void;
 }
 
