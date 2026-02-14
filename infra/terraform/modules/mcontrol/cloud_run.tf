@@ -47,6 +47,17 @@ resource "google_cloud_run_v2_service" "api" {
         value = var.api_base_url
       }
 
+      # Credential encryption key from Secret Manager
+      env {
+        name = "CREDENTIAL_ENCRYPTION_KEY"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.credential_encryption_key.secret_id
+            version = "latest"
+          }
+        }
+      }
+
       # Google OAuth secrets from Secret Manager
       env {
         name = "GOOGLE_CLIENT_ID"

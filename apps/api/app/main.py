@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import auth, health, websocket
+from app.routes import auth, health, keys, websocket
 
 
 def create_app() -> FastAPI:
@@ -33,6 +33,7 @@ def create_app() -> FastAPI:
     # Include routers
     app.include_router(auth.router, prefix="/api")
     app.include_router(health.router, prefix="/api")
+    app.include_router(keys.router, prefix="/api")
     app.include_router(websocket.router, prefix="/api")
 
     return app
